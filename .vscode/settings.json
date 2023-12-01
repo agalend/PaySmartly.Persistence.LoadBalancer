@@ -1,0 +1,10 @@
+{
+    "dotnet.defaultSolution": "PaySmartly.Persistence.sln",
+    "files.exclude": {
+		"**/obj": true,
+		"**/bin": true,
+		"**/*.csproj": true,
+		"**/.gitignore": true,
+		"**/PaySmartly.sln": true
+    },
+}
