@@ -6,5 +6,8 @@
 		"**/*.csproj": true,
 		"**/.gitignore": true,
 		"**/PaySmartly.sln": true
-    },
+	},
+	"cSpell.words": [
+		"Yarp"
+	],
 }
