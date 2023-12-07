@@ -4,35 +4,50 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using PaySmartly.Persistence.LoadBalancer;
+using PaySmartly.Persistence.LoadBalancer.Env;
 using PaySmartly.Persistence.LoadBalancer.ReverseProxy;
 using Yarp.ReverseProxy.Configuration;
 
-// TODO: set service name somewhere!!!
 string ServiceName = "Persistance.LoadBalancer Service";
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-   // TODO: options.ListenAnyIP if we have env var
-   options.ListenLocalhost(9087, listenOptions =>
-   {
-      listenOptions.Protocols = HttpProtocols.Http2;
-   });
-});
-
+ConfigureKestrel(builder);
 AddOpenTelemetryLogging(builder);
 
+builder.Services.AddSingleton<IEnvProvider, EnvProvider>();
 builder.Services.AddTransient<IProxyConfigProvider, YarpProxyConfigProvider>();
 builder.Services.AddReverseProxy();
-
 AddOpenTelemetryService(builder);
 
 var app = builder.Build();
-
-
 app.MapReverseProxy();
 app.Run();
+
+void ConfigureKestrel(WebApplicationBuilder builder)
+{
+   builder.WebHost.ConfigureKestrel(options =>
+   {
+      KestrelConfig? config = EnvProvider.Instance.GetKestrelConfig();
+
+      if (config?.ListenAnyIP == true)
+      {
+         options.ListenAnyIP(config.Port, listenOptions =>
+         {
+            listenOptions.Protocols = HttpProtocols.Http2;
+         });
+      }
+      else
+      {
+         int port = config?.Port ?? 9087;
+         options.ListenLocalhost(port, listenOptions =>
+         {
+            listenOptions.Protocols = HttpProtocols.Http2;
+         });
+      }
+   });
+}
 
 void AddOpenTelemetryLogging(WebApplicationBuilder builder)
 {
