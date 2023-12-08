@@ -13,10 +13,10 @@ namespace PaySmartly.Persistence.LoadBalancer
     public class EnvProvider : IEnvProvider
     {
         private const string KESTREL_ENDPOINT = "KESTREL_ENDPOINT_PORT";
-        private const string PERSISTANCE_ENDPOINTS = "PERSISTANCE_ENDPOINTS";
-
         private const string DEFAULT_KESTREL_ENDPOINT = "{\"port\": 9087, \"listenAnyIP\": false}";
-        private const string DEFAULTS_ENDPOINTS = "[\"http://localhost:9088/\", \"http://localhost:9089/\"]";
+
+        private const string PERSISTANCE_ENDPOINTS = "PERSISTANCE_ENDPOINTS";
+        private const string DEFAULTS_PERSISTANCE_ENDPOINTS = "[\"http://localhost:9088/\", \"http://localhost:9089/\"]";
 
         public static readonly IEnvProvider Instance;
 
@@ -35,7 +35,7 @@ namespace PaySmartly.Persistence.LoadBalancer
         public IEnumerable<string> GetPersistanceEndpointUrls()
         {
             string? json = Environment.GetEnvironmentVariable(PERSISTANCE_ENDPOINTS);
-            string endpoint = json ?? DEFAULTS_ENDPOINTS;
+            string endpoint = json ?? DEFAULTS_PERSISTANCE_ENDPOINTS;
 
 
             List<string> result = [];

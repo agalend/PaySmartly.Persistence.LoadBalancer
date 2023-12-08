@@ -84,15 +84,15 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
                     Active = new()
                     {
                         Enabled = true,
-                        Interval = TimeSpan.FromSeconds(5),
-                        Timeout = TimeSpan.FromSeconds(5),
+                        Interval = TimeSpan.FromSeconds(1),
+                        Timeout = TimeSpan.FromSeconds(3),
                         Policy = "ConsecutiveFailures",
                         Path = "/health"
                     }
                 },
                 Metadata = new Dictionary<string, string>
                 {
-                    {"ConsecutiveFailuresHealthPolicy.Threshold", "3"}
+                    {"ConsecutiveFailuresHealthPolicy.Threshold", "1"}
                 },
                 LoadBalancingPolicy = LoadBalancingPolicies.RoundRobin,
                 HttpRequest = new ForwarderRequestConfig()
