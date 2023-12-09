@@ -1,3 +1,4 @@
+using PaySmartly.Persistence.LoadBalancer.Env;
 using Yarp.ReverseProxy.Configuration;
 
 namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy

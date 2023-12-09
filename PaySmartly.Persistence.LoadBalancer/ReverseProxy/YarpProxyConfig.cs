@@ -1,5 +1,5 @@
-using System.Data;
 using Microsoft.Extensions.Primitives;
+using PaySmartly.Persistence.LoadBalancer.Env;
 using Yarp.ReverseProxy.Configuration;
 using Yarp.ReverseProxy.Forwarder;
 using Yarp.ReverseProxy.LoadBalancing;
@@ -61,7 +61,6 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
 
         private ClusterConfig CreateCluster(int number, IEnumerable<string> urls)
         {
-
             Dictionary<string, DestinationConfig> destinations = [];
 
             int count = 1;

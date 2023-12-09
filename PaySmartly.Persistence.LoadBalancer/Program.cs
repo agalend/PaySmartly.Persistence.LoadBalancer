@@ -13,9 +13,13 @@ string ServiceName = "Persistance.LoadBalancer Service";
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-ConfigureKestrel(builder);
+IConfigurationSection kestrelSettings = builder.Configuration.GetSection("Kestrel");
+ConfigureKestrel(builder, kestrelSettings.Get<KestrelConfig>());
 AddOpenTelemetryLogging(builder);
 
+IConfigurationSection endpointsSettings = builder.Configuration.GetSection("Endpoints");
+builder.Services.Configure<Endpoints>(endpointsSettings);
+builder.Services.Configure<KestrelConfig>(kestrelSettings);
 builder.Services.AddSingleton<IEnvProvider, EnvProvider>();
 builder.Services.AddTransient<IProxyConfigProvider, YarpProxyConfigProvider>();
 builder.Services.AddReverseProxy();
@@ -25,12 +29,10 @@ var app = builder.Build();
 app.MapReverseProxy();
 app.Run();
 
-void ConfigureKestrel(WebApplicationBuilder builder)
+void ConfigureKestrel(WebApplicationBuilder builder, KestrelConfig? config)
 {
    builder.WebHost.ConfigureKestrel(options =>
    {
-      KestrelConfig? config = EnvProvider.Instance.GetKestrelConfig();
-
       if (config?.ListenAnyIP == true)
       {
          options.ListenAnyIP(config.Port, listenOptions =>
