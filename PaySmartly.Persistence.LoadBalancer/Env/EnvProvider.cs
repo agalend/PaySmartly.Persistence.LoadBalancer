@@ -1,46 +1,42 @@
 using System.Text.Json;
-using Microsoft.Extensions.Options;
-using PaySmartly.Persistence.LoadBalancer.Env;
 
 namespace PaySmartly.Persistence.LoadBalancer.Env
 {
     public interface IEnvProvider
     {
-        KestrelConfig? GetKestrelConfig();
+        KestrelConfig? GetKestrelConfig(KestrelConfig? kestrelSetting);
 
-        IEnumerable<string> GetPersistanceEndpointUrls();
+        IEnumerable<string> GetPersistanceEndpointUrls(Endpoints? endpointsSetting);
     }
 
-    public class EnvProvider(
-        IOptions<KestrelConfig> kestrelSetting,
-        IOptions<Endpoints> endpointsSetting
-    ) : IEnvProvider
+    public class EnvProvider : IEnvProvider
     {
-        private const string KESTREL_ENDPOINT = "KESTREL_ENDPOINT_PORT";
+        private const string KESTREL_ENDPOINT_PORT = "KESTREL_ENDPOINT_PORT";
         private const string PERSISTANCE_ENDPOINTS = "PERSISTANCE_ENDPOINTS";
 
-        public KestrelConfig? GetKestrelConfig()
-        {
-            string? json = Environment.GetEnvironmentVariable(KESTREL_ENDPOINT);
+        public static readonly IEnvProvider Instance = new EnvProvider();
 
-            if (json is null)
+        public KestrelConfig? GetKestrelConfig(KestrelConfig? kestrelSetting)
+        {
+            string? strPort = Environment.GetEnvironmentVariable(KESTREL_ENDPOINT_PORT);
+
+            if (!int.TryParse(strPort, out int port))
             {
-                return kestrelSetting?.Value;
+                return kestrelSetting;
             }
             else
             {
-                JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                var config = JsonSerializer.Deserialize<KestrelConfig>(json, options);
+                KestrelConfig config = new() { Port = port, ListenAnyIP = true };
                 return config;
             }
         }
 
-        public IEnumerable<string> GetPersistanceEndpointUrls()
+        public IEnumerable<string> GetPersistanceEndpointUrls(Endpoints? endpointsSetting)
         {
             string? json = Environment.GetEnvironmentVariable(PERSISTANCE_ENDPOINTS);
             if (json is null)
             {
-                return endpointsSetting?.Value?.Persistance ?? Enumerable.Empty<string>();
+                return endpointsSetting?.Persistance ?? Enumerable.Empty<string>();
             }
             else
             {
