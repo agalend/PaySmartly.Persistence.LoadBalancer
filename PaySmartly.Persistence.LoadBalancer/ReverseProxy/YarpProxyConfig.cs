@@ -25,8 +25,10 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
             this.kestrelSetting = kestrelSetting;
             this.endpointsSetting = endpointsSetting;
             this.provider = provider;
+
             routes = GenerateRoutes();
             clusters = GenerateClusters();
+
             cts = new CancellationTokenSource();
             changeToken = new CancellationChangeToken(cts.Token);
         }
@@ -92,7 +94,7 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
                     {
                         Enabled = true,
                         Interval = TimeSpan.FromSeconds(1),
-                        Timeout = TimeSpan.FromSeconds(3),
+                        Timeout = TimeSpan.FromSeconds(1),
                         Policy = "ConsecutiveFailures",
                         Path = "/health"
                     }

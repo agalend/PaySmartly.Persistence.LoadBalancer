@@ -12,7 +12,7 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
     public class EnvProvider : IEnvProvider
     {
         private const string KESTREL_ENDPOINT_PORT = "KESTREL_ENDPOINT_PORT";
-        private const string PERSISTANCE_ENDPOINTS = "PERSISTANCE_ENDPOINTS";
+        private const string PERSISTENCE_ENDPOINTS = "PERSISTENCE_ENDPOINTS";
 
         public static readonly IEnvProvider Instance = new EnvProvider();
 
@@ -33,10 +33,10 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
 
         public IEnumerable<string> GetPersistanceEndpointUrls(Endpoints? endpointsSetting)
         {
-            string? json = Environment.GetEnvironmentVariable(PERSISTANCE_ENDPOINTS);
+            string? json = Environment.GetEnvironmentVariable(PERSISTENCE_ENDPOINTS);
             if (json is null)
             {
-                return endpointsSetting?.Persistance ?? Enumerable.Empty<string>();
+                return endpointsSetting?.Persistence ?? Enumerable.Empty<string>();
             }
             else
             {
