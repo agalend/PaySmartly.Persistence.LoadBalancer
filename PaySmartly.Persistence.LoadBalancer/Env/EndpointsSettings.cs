@@ -1,6 +1,6 @@
 namespace PaySmartly.Persistence.LoadBalancer.Env
 {
-    public class Endpoints
+    public class EndpointsSettings
     {
         public string[]? Persistence { get; set; }
     }

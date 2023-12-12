@@ -4,9 +4,9 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
 {
     public interface IEnvProvider
     {
-        KestrelConfig? GetKestrelConfig(KestrelConfig? kestrelSetting);
+        KestrelSettings? GetKestrelSettings(KestrelSettings? defaultSettings);
 
-        IEnumerable<string> GetPersistanceEndpointUrls(Endpoints? endpointsSetting);
+        EndpointsSettings? GetEndpointsSettings(EndpointsSettings? defaultSettings);
     }
 
     public class EnvProvider : IEnvProvider
@@ -16,32 +16,34 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
 
         public static readonly IEnvProvider Instance = new EnvProvider();
 
-        public KestrelConfig? GetKestrelConfig(KestrelConfig? kestrelSetting)
+        public KestrelSettings? GetKestrelSettings(KestrelSettings? defaultSettings)
         {
             string? strPort = Environment.GetEnvironmentVariable(KESTREL_ENDPOINT_PORT);
 
             if (!int.TryParse(strPort, out int port))
             {
-                return kestrelSetting;
+                return defaultSettings;
             }
             else
             {
-                KestrelConfig config = new() { Port = port, ListenAnyIP = true };
+                KestrelSettings config = new() { Port = port, ListenAnyIP = true };
                 return config;
             }
         }
 
-        public IEnumerable<string> GetPersistanceEndpointUrls(Endpoints? endpointsSetting)
+        public EndpointsSettings? GetEndpointsSettings(EndpointsSettings? defaultSettings)
         {
             string? json = Environment.GetEnvironmentVariable(PERSISTENCE_ENDPOINTS);
             if (json is null)
             {
-                return endpointsSetting?.Persistence ?? Enumerable.Empty<string>();
+                string[] persistenceUrls = defaultSettings?.Persistence ?? [];
+                return new() { Persistence = persistenceUrls };
             }
             else
             {
                 var urls = JsonSerializer.Deserialize<string[]>(json);
-                return urls ?? Enumerable.Empty<string>();
+                string[] persistenceUrls = urls ?? [];
+                return new() { Persistence = persistenceUrls };
             }
         }
     }

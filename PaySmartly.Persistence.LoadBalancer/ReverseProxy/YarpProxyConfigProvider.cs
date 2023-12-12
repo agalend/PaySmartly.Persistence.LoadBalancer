@@ -5,12 +5,12 @@ using Yarp.ReverseProxy.Configuration;
 namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
 {
     public class YarpProxyConfigProvider(
-            IOptions<KestrelConfig> kestrelSetting,
-            IOptions<Endpoints> endpointsSetting,
+            IOptions<KestrelSettings> kestrelSetting,
+            IOptions<EndpointsSettings> endpointsSetting,
             IEnvProvider provider) : IProxyConfigProvider
     {
-        private readonly IOptions<KestrelConfig> kestrelSetting = kestrelSetting;
-        private readonly IOptions<Endpoints> endpointsSetting = endpointsSetting;
+        private readonly IOptions<KestrelSettings> kestrelSetting = kestrelSetting;
+        private readonly IOptions<EndpointsSettings> endpointsSetting = endpointsSetting;
         private readonly IEnvProvider provider = provider;
 
         public IProxyConfig GetConfig()
