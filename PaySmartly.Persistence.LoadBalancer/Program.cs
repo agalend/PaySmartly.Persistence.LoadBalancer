@@ -1,4 +1,3 @@
-using System;
 using System.Net;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using OpenTelemetry;
@@ -10,22 +9,16 @@ using PaySmartly.Persistence.LoadBalancer.Env;
 using PaySmartly.Persistence.LoadBalancer.ReverseProxy;
 using Yarp.ReverseProxy.Configuration;
 
-string ServiceName = "Persistance.LoadBalancer Service";
+string ServiceName = "Persistence.LoadBalancer Service";
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-IConfigurationSection endpointsSettings = builder.Configuration.GetSection("Endpoints");
-builder.Services.Configure<EndpointsSettings>(endpointsSettings);
-IConfigurationSection kestrelSettings = builder.Configuration.GetSection("Kestrel");
-builder.Services.Configure<KestrelSettings>(kestrelSettings);
-
-KestrelSettings? kestrelConfig = kestrelSettings.Get<KestrelSettings>();
-ConfigureKestrel(builder, EnvProvider.Instance.GetKestrelSettings(kestrelConfig));
-
+IEnvProvider envProvider = CreateEnvProvider(builder);
+ConfigureKestrel(builder, envProvider.GetKestrelSettings());
 AddOpenTelemetryLogging(builder);
 
-builder.Services.AddSingleton<IEnvProvider, EnvProvider>();
-builder.Services.AddTransient<IProxyConfigProvider, YarpProxyConfigProvider>();
+builder.Services.AddSingleton(envProvider);
+builder.Services.AddSingleton<IProxyConfigProvider, YarpProxyConfigProvider>();
 builder.Services.AddReverseProxy();
 AddOpenTelemetryService(builder);
 
@@ -80,4 +73,15 @@ void AddOpenTelemetryService(WebApplicationBuilder builder)
    {
       metrics.AddAspNetCoreInstrumentation().AddConsoleExporter();
    });
+}
+
+IEnvProvider CreateEnvProvider(WebApplicationBuilder builder)
+{
+   IConfigurationSection endpointsSection = builder.Configuration.GetSection("Endpoints");
+   EndpointsSettings? endpointsSettings = endpointsSection.Get<EndpointsSettings>();
+   IConfigurationSection kestrelSection = builder.Configuration.GetSection("Kestrel");
+   KestrelSettings? kestrelSettings = kestrelSection.Get<KestrelSettings>();
+
+   EnvProvider envProvider = new(kestrelSettings, endpointsSettings);
+   return envProvider;
 }

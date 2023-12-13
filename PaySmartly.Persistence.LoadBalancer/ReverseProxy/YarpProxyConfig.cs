@@ -9,21 +9,14 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
 {
     public class YarpProxyConfig : IProxyConfig
     {
-        private readonly IOptions<KestrelSettings> kestrelSetting;
-        private readonly IOptions<EndpointsSettings> endpointsSetting;
         private readonly IEnvProvider provider;
         private readonly List<RouteConfig> routes;
         private readonly List<ClusterConfig> clusters;
         private readonly CancellationChangeToken changeToken;
         private readonly CancellationTokenSource cts;
 
-        public YarpProxyConfig(
-            IOptions<KestrelSettings> kestrelSetting,
-            IOptions<EndpointsSettings> endpointsSetting,
-            IEnvProvider provider)
+        public YarpProxyConfig(IEnvProvider provider)
         {
-            this.kestrelSetting = kestrelSetting;
-            this.endpointsSetting = endpointsSetting;
             this.provider = provider;
 
             routes = GenerateRoutes();
@@ -45,7 +38,7 @@ namespace PaySmartly.Persistence.LoadBalancer.ReverseProxy
 
         private List<ClusterConfig> GenerateClusters()
         {
-            EndpointsSettings? settings = provider.GetEndpointsSettings(endpointsSetting?.Value);
+            EndpointsSettings? settings = provider.GetEndpointsSettings();
             IEnumerable<string> urls = settings?.Persistence ?? Enumerable.Empty<string>();
             ClusterConfig config = CreateCluster(1, urls);
             var collection = new List<ClusterConfig>([config]);

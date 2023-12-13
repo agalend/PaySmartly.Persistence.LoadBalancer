@@ -4,25 +4,25 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
 {
     public interface IEnvProvider
     {
-        KestrelSettings? GetKestrelSettings(KestrelSettings? defaultSettings);
+        KestrelSettings? GetKestrelSettings();
 
-        EndpointsSettings? GetEndpointsSettings(EndpointsSettings? defaultSettings);
+        EndpointsSettings? GetEndpointsSettings();
     }
 
-    public class EnvProvider : IEnvProvider
+    public class EnvProvider(KestrelSettings? kestrelSettings, EndpointsSettings? endpointsSettings) : IEnvProvider
     {
         private const string KESTREL_ENDPOINT_PORT = "KESTREL_ENDPOINT_PORT";
         private const string PERSISTENCE_ENDPOINTS = "PERSISTENCE_ENDPOINTS";
+        private readonly KestrelSettings? kestrelSettings = kestrelSettings;
+        private readonly EndpointsSettings? endpointsSettings = endpointsSettings;
 
-        public static readonly IEnvProvider Instance = new EnvProvider();
-
-        public KestrelSettings? GetKestrelSettings(KestrelSettings? defaultSettings)
+        public KestrelSettings? GetKestrelSettings()
         {
             string? strPort = Environment.GetEnvironmentVariable(KESTREL_ENDPOINT_PORT);
 
             if (!int.TryParse(strPort, out int port))
             {
-                return defaultSettings;
+                return kestrelSettings;
             }
             else
             {
@@ -31,19 +31,19 @@ namespace PaySmartly.Persistence.LoadBalancer.Env
             }
         }
 
-        public EndpointsSettings? GetEndpointsSettings(EndpointsSettings? defaultSettings)
+        public EndpointsSettings? GetEndpointsSettings()
         {
+            string[]? persistenceUrls = endpointsSettings?.Persistence;
             string? json = Environment.GetEnvironmentVariable(PERSISTENCE_ENDPOINTS);
+
             if (json is null)
             {
-                string[] persistenceUrls = defaultSettings?.Persistence ?? [];
                 return new() { Persistence = persistenceUrls };
             }
             else
             {
                 var urls = JsonSerializer.Deserialize<string[]>(json);
-                string[] persistenceUrls = urls ?? [];
-                return new() { Persistence = persistenceUrls };
+                return new() { Persistence = urls ?? persistenceUrls };
             }
         }
     }
